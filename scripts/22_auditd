@@ -1,4 +1,8 @@
 function f_auditd {
+  if [[ $LXC == "1" ]]; then
+    return
+  fi
+
   echo "[$SCRIPT_COUNT] Auditd"
 
   sed -i 's/^action_mail_acct =.*/action_mail_acct = root/' "$AUDITDCONF"
@@ -16,7 +20,6 @@ function f_auditd {
   done
   cat "./misc/audit.footer" >> /etc/audit/audit.rules
 
-  sed -i "s/arch=b64/arch=$(uname -m)/g" /etc/audit/audit.rules
   sed -i "s/-f.*/-f $AUDITD_MODE/g" /etc/audit/audit.rules
 
   cp /etc/audit/audit.rules "$AUDITRULES"

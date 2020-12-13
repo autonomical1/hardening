@@ -45,17 +45,17 @@ function f_sshdconfig {
   fi
 
   if ! grep -q "^MaxAuthTries" "$SSHDFILE" 2> /dev/null; then
-    echo "MaxAuthTries 4" >> "$SSHDFILE"
+    echo "MaxAuthTries 3" >> "$SSHDFILE"
   else
-    sed -i 's/MaxAuthTries.*/MaxAuthTries 4/' "$SSHDFILE"
+    sed -i 's/MaxAuthTries.*/MaxAuthTries 3/' "$SSHDFILE"
   fi
 
   if ! grep -q "^ClientAliveInterval" "$SSHDFILE" 2> /dev/null; then
-    echo "ClientAliveInterval 300" >> "$SSHDFILE"
+    echo "ClientAliveInterval 200" >> "$SSHDFILE"
   fi
 
   if ! grep -q "^ClientAliveCountMax" "$SSHDFILE" 2> /dev/null; then
-    echo "ClientAliveCountMax 0" >> "$SSHDFILE"
+    echo "ClientAliveCountMax 3" >> "$SSHDFILE"
   fi
 
   if ! grep -q "^PermitUserEnvironment" "$SSHDFILE" 2> /dev/null; then
@@ -75,9 +75,9 @@ function f_sshdconfig {
   fi
 
   if ! grep -q "^MaxSessions" "$SSHDFILE" 2> /dev/null; then
-    echo "MaxSessions 4" >> "$SSHDFILE"
+    echo "MaxSessions 3" >> "$SSHDFILE"
   else
-    sed -i 's/MaxSessions.*/MaxSessions 4"/' "$SSHDFILE"
+    sed -i 's/MaxSessions.*/MaxSessions 3/' "$SSHDFILE"
   fi
 
   if ! grep -q "^UseDNS" "$SSHDFILE" 2> /dev/null; then
@@ -102,6 +102,42 @@ function f_sshdconfig {
     echo "HostbasedAuthentication no" >> "$SSHDFILE"
   else
     sed -i 's/HostbasedAuthentication.*/HostbasedAuthentication no/' "$SSHDFILE"
+  fi
+
+  if ! grep -q "^KerberosAuthentication" "$SSHDFILE" 2> /dev/null; then
+    echo "KerberosAuthentication no" >> "$SSHDFILE"
+  else
+    sed -i 's/KerberosAuthentication.*/KerberosAuthentication no/' "$SSHDFILE"
+  fi
+
+  if ! grep -q "^GSSAPIAuthentication" "$SSHDFILE" 2> /dev/null; then
+    echo "GSSAPIAuthentication no" >> "$SSHDFILE"
+  else
+    sed -i 's/GSSAPIAuthentication.*/GSSAPIAuthentication no/' "$SSHDFILE"
+  fi
+
+  if ! grep -q "^RekeyLimit" "$SSHDFILE" 2> /dev/null; then
+    echo "RekeyLimit 512M 1h" >> "$SSHDFILE"
+  else
+    sed -i 's/RekeyLimit.*/RekeyLimit 512M 1h/' "$SSHDFILE"
+  fi
+
+  if ! grep -q "^AllowTcpForwarding" "$SSHDFILE" 2> /dev/null; then
+    echo "AllowTcpForwarding no" >> "$SSHDFILE"
+  else
+    sed -i 's/AllowTcpForwarding.*/AllowTcpForwarding no/' "$SSHDFILE"
+  fi
+
+  if ! grep -q "^AllowAgentForwarding" "$SSHDFILE" 2> /dev/null; then
+    echo "AllowAgentForwarding no" >> "$SSHDFILE"
+  else
+    sed -i 's/AllowAgentForwarding.*/AllowTcpForwarding no/' "$SSHDFILE"
+  fi
+
+  if ! grep -q "^TCPKeepAlive" "$SSHDFILE" 2> /dev/null; then
+    echo "TCPKeepAlive no" >> "$SSHDFILE"
+  else
+    sed -i 's/TCPKeepAlive.*/TCPKeepAlive no/' "$SSHDFILE"
   fi
 
   cp "$SSHDFILE" "/etc/ssh/sshd_config.$(date +%y%m%d)"

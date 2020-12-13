@@ -1,7 +1,10 @@
 #!/bin/bash
 
+# shellcheck disable=1090
 # shellcheck disable=2009
 # shellcheck disable=2034
+
+set -u -o pipefail
 
 if ! ps -p $$ | grep -si bash; then
   echo "Sorry, this script requires bash."
@@ -17,15 +20,26 @@ function main {
   clear
 
   REQUIREDPROGS='arp w'
+  REQFAILED=0
   for p in $REQUIREDPROGS; do
     if ! command -v "$p" >/dev/null 2>&1; then
       echo "$p is required."
-      exit 1
+      REQFAILED=1
     fi
   done
 
+  if [ $REQFAILED = 1 ]; then
+    echo 'net-tools and procps packages has to be installed.'
+    exit 1
+  fi
+
   ARPBIN="$(command -v arp)"
   WBIN="$(command -v w)"
+  LXC="0"
+
+  if grep -qE 'container=lxc|container=lxd' /proc/1/environ; then
+    LXC="1"
+  fi
 
   if grep -s "AUTOFILL='Y'" ./ubuntu.cfg; then
     USERIP="$($WBIN -ih | awk '{print $3}' | head -n1)"
@@ -33,7 +47,7 @@ function main {
     if [[ "$USERIP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
       ADMINIP="$USERIP"
     else
-      ADMINIP=""
+      ADMINIP="$(hostname -I | sed -E 's/\.[0-9]+ /.0\/24 /g')"
     fi
 
     sed -i "s/FW_ADMIN='/FW_ADMIN='$ADMINIP /" ./ubuntu.cfg
@@ -44,50 +58,52 @@ function main {
 
   source ./ubuntu.cfg
 
+  readonly ADDUSER
   readonly ARPBIN
-  readonly WBIN
-  readonly FW_ADMIN
-  readonly SSH_GRPS
-  readonly SSH_PORT
-  readonly SYSCTL_CONF
+  readonly AUDITDCONF
   readonly AUDITD_MODE
   readonly AUDITD_RULES
-  readonly LOGROTATE_CONF
-  readonly NTPSERVERPOOL
-  readonly TIMEDATECTL
-  readonly VERBOSE
-  readonly CHANGEME
-  readonly ADDUSER
-  readonly AUDITDCONF
   readonly AUDITRULES
-  readonly COMMONPASSWD
+  readonly AUTOFILL
+  readonly CHANGEME
   readonly COMMONACCOUNT
   readonly COMMONAUTH
+  readonly COMMONPASSWD
   readonly COREDUMPCONF
   readonly DEFAULTGRUB
-  readonly DISABLEMNT
+  readonly DISABLEFS
   readonly DISABLEMOD
   readonly DISABLENET
+  readonly FW_ADMIN
   readonly JOURNALDCONF
   readonly LIMITSCONF
   readonly LOGINDCONF
   readonly LOGINDEFS
   readonly LOGROTATE
+  readonly LOGROTATE_CONF
+  readonly LXC
+  readonly NTPSERVERPOOL
   readonly PAMLOGIN
   readonly RESOLVEDCONF
   readonly RKHUNTERCONF
   readonly SECURITYACCESS
   readonly SSHDFILE
+  readonly SSHFILE
+  readonly SSH_GRPS
+  readonly SSH_PORT
   readonly SYSCTL
+  readonly SYSCTL_CONF
   readonly SYSTEMCONF
+  readonly TIMEDATECTL
   readonly TIMESYNCD
   readonly UFWDEFAULT
   readonly USERADD
   readonly USERCONF
+  readonly VERBOSE
+  readonly WBIN
 
-  # shellcheck disable=1090
   for s in ./scripts/[0-9_]*; do
-    [[ -e $s ]] || break
+    [[ -f $s ]] || break
 
     source "$s"
   done
@@ -109,6 +125,7 @@ function main {
   f_aptget
   f_hosts
   f_issue
+  f_sudo
   f_logindefs
   f_sysctl
   f_limitsconf
@@ -132,7 +149,6 @@ function main {
   f_users
   f_lockroot
   f_package_remove
-  f_aptget_clean
   f_suid
   f_restrictcompilers
   f_umask
@@ -141,6 +157,7 @@ function main {
   f_aide_post
   f_aide_timer
   f_aptget_noexec
+  f_aptget_clean
   f_systemddelta
   f_post
   f_checkreboot

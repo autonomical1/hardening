@@ -1,5 +1,7 @@
 function f_fstab {
-  echo "[$SCRIPT_COUNT] /etc/fstab, system/tmp.mount and system/var-tmp.mount"
+  echo "[$SCRIPT_COUNT] /etc/fstab and system/tmp.mount"
+
+  local TMPFSTAB
 
   cp ./config/tmp.mount /etc/systemd/system/tmp.mount
   cp /etc/fstab /etc/fstab.bck
@@ -8,7 +10,7 @@ function f_fstab {
 
   sed -i '/floppy/d' /etc/fstab
 
-  grep -v -E '[[:space:]]/boot[[:space:]]|[[:space:]]/home[[:space:]]|[[:space:]]/var/log[[:space:]]|[[:space:]]/var/log/audit[[:space:]]' /etc/fstab > "$TMPFSTAB"
+  grep -v -E '[[:space:]]/boot[[:space:]]|[[:space:]]/home[[:space:]]|[[:space:]]/var/log[[:space:]]|[[:space:]]/var/log/audit[[:space:]]|[[:space:]]/var/tmp[[:space:]]' /etc/fstab > "$TMPFSTAB"
 
   if grep -q '[[:space:]]/boot[[:space:]].*defaults[[:space:]]0 0$' /etc/fstab; then
     grep '[[:space:]]/boot[[:space:]].*defaults[[:space:]]0 0$' /etc/fstab | sed 's/defaults/defaults,nosuid,nodev/g' >> "$TMPFSTAB"
@@ -24,6 +26,10 @@ function f_fstab {
 
   if grep -q '[[:space:]]/var/log/audit[[:space:]].*defaults[[:space:]]0 0$' /etc/fstab; then
     grep '[[:space:]]/var/log/audit[[:space:]].*defaults[[:space:]]0 0$' /etc/fstab | sed 's/defaults/defaults,nosuid,nodev,noexec/g' >> "$TMPFSTAB"
+  fi
+
+  if grep -q '[[:space:]]/var/tmp[[:space:]].*defaults[[:space:]]0 0$' /etc/fstab; then
+    grep '[[:space:]]/var/tmp[[:space:]].*defaults[[:space:]]0 0$' /etc/fstab | sed 's/defaults/defaults,nosuid,nodev,noexec/g' >> "$TMPFSTAB"
   fi
 
   cp "$TMPFSTAB" /etc/fstab
@@ -43,7 +49,7 @@ function f_fstab {
   if [ -e /etc/systemd/system/tmp.mount ]; then
     sed -i '/^\/tmp/d' /etc/fstab
 
-    for t in $(mount | grep -e "[[:space:]]/tmp[[:space:]]" -e "[[:space:]]/var/tmp[[:space:]]" | awk '{print $3}'); do
+    for t in $(mount | grep "[[:space:]]/tmp[[:space:]]" | awk '{print $3}'); do
       umount "$t"
     done
 
@@ -52,12 +58,7 @@ function f_fstab {
     ln -s /etc/systemd/system/tmp.mount /etc/systemd/system/default.target.wants/tmp.mount
     sed -i 's/Options=.*/Options=mode=1777,strictatime,noexec,nodev,nosuid/' /etc/systemd/system/tmp.mount
 
-    cp /etc/systemd/system/tmp.mount /etc/systemd/system/var-tmp.mount
-    sed -i 's/\/tmp/\/var\/tmp/g' /etc/systemd/system/var-tmp.mount
-    ln -s /etc/systemd/system/var-tmp.mount /etc/systemd/system/default.target.wants/var-tmp.mount
-
     chmod 0644 /etc/systemd/system/tmp.mount
-    chmod 0644 /etc/systemd/system/var-tmp.mount
 
     systemctl daemon-reload
   else

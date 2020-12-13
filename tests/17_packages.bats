@@ -32,6 +32,16 @@ load test_helper
   [ "$status" -eq 0 ]
 }
 
+@test "Verify that audispd-plugins is installed" {
+  run packageInstalled 'audispd-plugins'
+  [ "$status" -eq 0 ]
+}
+
+@test "Verify that cracklib-runtime is installed" {
+  run packageInstalled 'cracklib-runtime'
+  [ "$status" -eq 0 ]
+}
+
 @test "Verify that debsums is installed" {
   run packageInstalled 'debsums'
   [ "$status" -eq 0 ]
@@ -47,8 +57,8 @@ load test_helper
   [ "$status" -eq 0 ]
 }
 
-@test "Verify that libpam-cracklib is installed" {
-  run packageInstalled 'libpam-cracklib'
+@test "Verify that libpam-pwquality is installed" {
+  run packageInstalled 'libpam-pwquality'
   [ "$status" -eq 0 ]
 }
 
@@ -89,6 +99,16 @@ load test_helper
 
 @test "Verify that needrestart is installed" {
   run packageInstalled 'needrestart'
+  [ "$status" -eq 0 ]
+}
+
+@test "Verify that sysstat is installed" {
+  run packageInstalled 'sysstat'
+  [ "$status" -eq 0 ]
+}
+
+@test "Verify that sysstat is enabled" {
+  run bash -c 'grep ENABLED=\"true\" /etc/default/sysstat'
   [ "$status" -eq 0 ]
 }
 

@@ -20,7 +20,16 @@ fragmentPath() {
 }
 
 gotSGid() {
-  stat -c %A | grep -q 's'
+  bin="$(command -v "$1")"
+  if [ -x "$bin" ]; then
+    if [ "$(stat -c %a "$bin")" -le 777 ]; then
+      exit 0
+    else
+      exit 1
+    fi
+  else
+    exit 0
+  fi
 }
 
 isMasked() {
@@ -55,7 +64,7 @@ oneEntry() {
 }
 
 sshdConfig() {
-  sshd -T | grep -i "$1"
+  sshd -T | grep -iE "$1"
 }
 
 sysctlRuntime() {

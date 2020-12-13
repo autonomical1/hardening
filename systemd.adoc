@@ -7,12 +7,19 @@ examples, hopefully making your server and services a bit more secure.
 == Documentation
 https://github.com/konstruktoid/hardening[Hardening Ubuntu. Systemd edition.] +
 http://0pointer.de/blog/projects/security.html[systemd for Administrators, Part XII: Securing Your Services] +
-https://github.com/systemd/systemd[systemd upstream]
+https://github.com/systemd/systemd[systemd upstream] +
+https://www.freedesktop.org/software/systemd/man/systemd.exec.html[systemd execution environment configuration]
 
-=== systemd_scan.sh
+=== systemd-analyze and systemd_scan.sh
+
+Since `systemd` version 240, `systemd-analyze` has the "security" option for
+analyzing the security and sand-boxing settings of services in order to
+determine an "exposure level" for them, indicating whether a service would
+benefit from more sand-boxing options turned on for them.
 
 https://github.com/konstruktoid/hardening/blob/master/misc/systemd_scan.sh[systemd_scan.sh]
-is a script to check the current `systemd` configuration of a local service.
+is a script to check the current `systemd` configuration of a local service,
+similar to a very basic version of `systemd-analyze security`.
 
 [source,shell]
 ----
@@ -33,6 +40,44 @@ $ bash systemd_scan.sh mongodb
     [P] ProtectSystem=full is set.
     [P] ProtectHome=true is set.
     [I] 6 failures, 7 passed.
+----
+
+`systemd-analyze security` calculates an exposure value based on the following
+configuration options:
+
+[source,shell]
+----
+AmbientCapabilities=
+CapabilityBoundingSet=
+Delegate=
+DeviceAllow=
+IPAddressDeny=
+KeyringMode=
+LockPersonality=
+MemoryDenyWriteExecute=
+NoNewPrivileges=
+NotifyAccess=
+PrivateDevices=
+PrivateMounts=
+PrivateNetwork=
+PrivateTmp=
+PrivateUsers=
+ProtectControlGroups=
+ProtectHome=
+ProtectHostname=
+ProtectKernelLogs=
+ProtectKernelModules=
+ProtectKernelTunables=
+ProtectSystem=
+RestrictAddressFamilies=
+RestrictNamespaces=
+RestrictRealtime=
+RestrictSUIDSGID=
+RootDirectory=/RootImage=
+SystemCallArchitectures=
+SystemCallFilter=
+UMask=
+User=/DynamicUser=
 ----
 
 == Logging
@@ -81,31 +126,13 @@ Before=local-fs.target
 What=tmpfs // <1>
 Where=/tmp // <2>
 Type=tmpfs // <3>
-Options=mode=1777,strictatime,nodev,nosuid // <4><5>
+Options=mode=1777,strictatime,nodev,noexec,nosuid // <4><5>
 ----
 
 <1> "an absolute path of a device node, file or other resource to mount."
 <2> "an absolute path of a directory of the mount point."
 <3> "a string for the file system type."
 <4> "options to use when mounting."
-<5> add `noexec` if possible.
-
-=== /etc/systemd/system/var-tmp.mount
-[source,shell]
-----
-[Unit]
-Description=Temporary Directory
-Documentation=man:hier(7)
-Before=local-fs.target
-
-[Mount]
-What=tmpfs
-Where=/var/tmp
-Type=tmpfs
-Options=mode=1777,strictatime,nodev,nosuid // <1>
-----
-
-<1> add `noexec` if possible.
 
 == System
 
@@ -178,17 +205,21 @@ CapabilityBoundingSet= // <6>
 PrivateDevices= // <7>
 User=, Group= // <8>
 DynamicUser= // <9>
+TemporaryFileSystem= // <10>
+PrivateUsers= // <11>
 ----
 
-<1> "sets up a new file system namespace for the executed processes and mounts private /tmp and /var/tmp directories inside it that is not shared by processes outside of the namespace."
-<2> "If true, mounts the /usr and /boot directories read-only for processes invoked by this unit. If set to "full", the /etc directory is mounted read-only, too."
-<3> "If true, the directories /home, /root and /run/user are made inaccessible and empty for processes invoked by this unit. If set to "read-only", the three directories are made read-only instead."
+<1> "Takes a boolean argument. If true, sets up a new file system namespace for the executed processes and mounts private /tmp and /var/tmp directories inside it that is not shared by processes outside of the namespace."
+<2> "If true, mounts the /usr and /boot directories read-only for processes invoked by this unit. If set to "full", the /etc directory is mounted read-only, too. If set to "strict" the entire file system hierarchy is mounted read-only, except for the API file system subtrees /dev, /proc and /sys."
+<3> "Takes a boolean argument or the special values "read-only" or "tmpfs". If true, the directories /home, /root, and /run/user are made inaccessible and empty for processes invoked by this unit. If set to "read-only", the three directories are made read-only instead. If set to "tmpfs", temporary file systems are mounted on the three directories in read-only mode."
 <4> "If true, ensures that the service process and all its children can never gain new privileges."
 <5> "Sets up a new file system namespace for executed processes."
 <6> "Controls which capabilities to include in the capability bounding set for the executed process."
 <7> "If true, sets up a new /dev namespace for the executed processes and only adds API pseudo devices such as /dev/null, /dev/zero or /dev/random (as well as the pseudo TTY subsystem) to it"
 <8> "Sets the Unix user or group that the processes are executed as, respectively"
 <9> "User and group pair is allocated dynamically when the unit is started, and released as soon as it is stopped."
+<10> "Takes a space-separated list of mount points for temporary file systems (tmpfs). If set, a new file system namespace is set up for executed processes, and a temporary file system is mounted on each mount point."
+<11> "Takes a boolean argument. If true, sets up a new user namespace for the executed processes and configures a minimal user and group mapping, that maps the "root" user and group as well as the unit's own user and group to themselves and everything else to the "nobody" user and group."
 
 === /etc/systemd/system/nginx.service example
 
