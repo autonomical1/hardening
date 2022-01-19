@@ -5,8 +5,7 @@ image::logo/horizontal.png[Ubuntu Hardening]
 
 A quick way to make a Ubuntu server a bit more secure.
 
-Tested on `Ubuntu 20.04 Focal Fossa`, `Ubuntu 21.04 Hirsute Hippo`
-and `Ubuntu 21.10 Impish Indri (development branch)`.
+Tested on `Ubuntu 20.04 Focal Fossa` and `Ubuntu 21.10 Impish Indri`.
 
 Systemd required.
 
@@ -358,7 +357,7 @@ f_checkreboot
 ----
 
 == Tests
-There are approximately 700 https://github.com/sstephenson/bats[Bats tests]
+There are approximately 750 https://github.com/bats-core/bats-core[Bats tests]
 for most of the above settings available in the link:tests/[tests directory].
 
 [source,shell]

@@ -9,6 +9,7 @@ aria2c
 arj
 arp
 as
+ascii-xfr
 ash
 at
 atobm
@@ -24,6 +25,7 @@ bundler
 busctl
 busybox
 byebug
+bzip2
 c89
 c99
 cancel
@@ -79,6 +81,7 @@ dvips
 easy_install
 eb
 ed
+efax
 emacs
 env
 eqn
@@ -159,6 +162,7 @@ mtr
 mv
 mysql
 nano
+nasm
 nawk
 nc
 neofetch
@@ -179,9 +183,11 @@ openssl
 openvpn
 openvt
 paste
+pax
 pdb
 pdflatex
 pdftex
+perf
 perl
 pg
 php

@@ -14,26 +14,22 @@ Vagrant.configure("2") do |config|
     focal.vm.boot_timeout = 600
     focal.vm.box = "ubuntu/focal64"
     focal.vm.hostname = "focal"
-    focal.vm.network "private_network", ip: "10.7.8.45"
   end
-
-#  https://bugs.launchpad.net/ubuntu/+source/aide/+bug/1903298
-#  config.vm.define "hirsute" do |hirsute|
-#    hirsute.ssh.extra_args = ["-o","ConnectTimeout=600"]
-#    hirsute.ssh.insert_key = true
-#    hirsute.vm.boot_timeout = 600
-#    hirsute.vm.box = "ubuntu/hirsute64"
-#    hirsute.vm.hostname = "hirsute"
-#    hirsute.vm.network "private_network", ip: "10.7.8.47"
-#  end
 
   config.vm.define "impish" do |impish|
     impish.ssh.extra_args = ["-o","ConnectTimeout=600"]
     impish.ssh.insert_key = true
     impish.vm.boot_timeout = 600
-    impish.vm.box = "impish/20210904"
-    impish.vm.box_url = "https://cloud-images.ubuntu.com/impish/20210904/impish-server-cloudimg-amd64-vagrant.box"
+    impish.vm.box = "ubuntu/impish64"
     impish.vm.hostname = "impish"
-    impish.vm.network "private_network", ip: "10.7.8.48"
+  end
+
+  config.vm.define "jammy" do |jammy|
+    jammy.ssh.extra_args = ["-o","ConnectTimeout=600"]
+    jammy.ssh.insert_key = true
+    jammy.vm.boot_timeout = 600
+    jammy.vm.box = "jammy/20220112"
+    jammy.vm.box_url = "https://cloud-images.ubuntu.com/jammy/20220112.1/jammy-server-cloudimg-amd64-vagrant.box"
+    jammy.vm.hostname = "jammy"
   end
 end
