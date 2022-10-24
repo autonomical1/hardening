@@ -16,20 +16,20 @@ Vagrant.configure("2") do |config|
     focal.vm.hostname = "focal"
   end
 
-  config.vm.define "impish" do |impish|
-    impish.ssh.extra_args = ["-o","ConnectTimeout=600"]
-    impish.ssh.insert_key = true
-    impish.vm.boot_timeout = 600
-    impish.vm.box = "ubuntu/impish64"
-    impish.vm.hostname = "impish"
-  end
-
   config.vm.define "jammy" do |jammy|
     jammy.ssh.extra_args = ["-o","ConnectTimeout=600"]
     jammy.ssh.insert_key = true
     jammy.vm.boot_timeout = 600
-    jammy.vm.box = "jammy/20220112"
-    jammy.vm.box_url = "https://cloud-images.ubuntu.com/jammy/20220112.1/jammy-server-cloudimg-amd64-vagrant.box"
+    jammy.vm.box = "ubuntu/jammy64"
     jammy.vm.hostname = "jammy"
+  end
+
+  config.vm.define "kinetic" do |kinetic|
+    kinetic.ssh.extra_args = ["-o","ConnectTimeout=600"]
+    kinetic.ssh.insert_key = true
+    kinetic.vm.boot_timeout = 600
+    kinetic.vm.box = "ubuntu/kinetic"
+    kinetic.vm.box_url = "https://cloud-images.ubuntu.com/kinetic/current/kinetic-server-cloudimg-amd64-vagrant.box"
+    kinetic.vm.hostname = "kinetic"
   end
 end

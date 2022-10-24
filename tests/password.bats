@@ -18,17 +18,17 @@ load test_helper
 }
 
 @test "Verify cracklib password list" {
-  run bash -c "grep '/usr/share/dict/passwords' '/var/cache/cracklib/src-dicts'"
+  run bash -c "grep -E '/usr/share/dict/passwords|/usr/share/dict/passwords_text' '/var/cache/cracklib/src-dicts'"
   [ "$status" -eq 0 ]
 }
 
 @test "Verify password hash in $COMMONPASSWD" {
-  run bash -c "grep '^password.*pam_unix.*[[:space:]]sha512' $COMMONPASSWD"
+  run bash -c "grep -E '^password.*pam_unix.*[[:space:]]sha512|^password.*pam_unix.*[[:space:]]yescrypt' $COMMONPASSWD"
   [ "$status" -eq 0 ]
 }
 
 @test "Verify password rounds in $COMMONPASSWD" {
-  run bash -c "grep '^password.*pam_unix.*[[:space:]]sha512[[:space:]]rounds=65536$' $COMMONPASSWD"
+  run bash -c "grep -E '^password.*pam_unix.*[[:space:]]sha512[[:space:]]rounds=65536$|^password.*pam_unix.*[[:space:]]yescrypt' $COMMONPASSWD"
   [ "$status" -eq 0 ]
 }
 
